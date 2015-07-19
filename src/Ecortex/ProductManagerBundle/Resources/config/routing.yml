@@ -1,0 +1,3 @@
+ecortex_pm_homepage:
+    path:     /hello/{name}
+    defaults: { _controller: EcortexPMBundle:Default:index }

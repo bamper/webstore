@@ -1,3 +1,11 @@
+ecortex_pm:
+    resource: "@EcortexPMBundle/Resources/config/routing.yml"
+    prefix:   /
+
+ecortex_product_manager:
+    resource: "@EcortexProductManagerBundle/Resources/config/routing.yml"
+    prefix:   /
+
 app:
     resource: "@AppBundle/Controller/"
     type:     annotation
