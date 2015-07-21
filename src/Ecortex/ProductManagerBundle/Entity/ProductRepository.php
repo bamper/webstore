@@ -12,4 +12,22 @@ use Doctrine\ORM\EntityRepository;
  */
 class ProductRepository extends EntityRepository
 {
+    public function getByRefAndProvider($ref, $provider_id) {
+        $q = $this->createQueryBuilder('p')
+            ->where('p.ref = :ref')
+            ->setParameter('ref', $ref)
+            ->join('p.provider', 'pro')
+            ->addSelect('pro')
+            ->andWhere('pro.id = :pro_id')
+            ->setParameter('pro_id', $provider_id)
+            ->leftJoin('p.rangePrices', 'r')
+            ->addSelect('r')
+            ->leftJoin('r.productOptions', 'o')
+            ->addSelect('o')
+            ->getQuery();
+
+        $result = $q->getSingleResult();
+
+        return $result;
+    }
 }

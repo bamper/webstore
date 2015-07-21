@@ -9,8 +9,10 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * RangePrice
  *
- * @ORM\Table()
+ * @ORM\Table(uniqueConstraints={@ORM\UniqueConstraint(name="uniRangePrice1",columns={"min", "max", "product_id"})})
  * @ORM\Entity(repositoryClass="Ecortex\ProductManagerBundle\Entity\RangePriceRepository")
+ * @UniqueEntity(fields={"min", "max", "product"}, message="Cette tranche de prix est déjà listée")
+ * @ORM\HasLifecycleCallBacks()
  */
 class RangePrice
 {
@@ -24,9 +26,9 @@ class RangePrice
     private $id;
 
     /**
-     * @var integer
+     * @var string
      *
-     * @ORM\Column(name="price", type="integer")
+     * @ORM\Column(name="price", type="decimal", scale=2)
      */
     private $price;
 
@@ -56,6 +58,26 @@ class RangePrice
     private $productOptions;
 
     /**
+     * @ORM\ManyToMany(targetEntity="Ecortex\ProductManagerBundle\Entity\Tag", cascade={"persist"})
+     */
+    private $tags;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="date", type="datetime")
+     * @Assert\DateTime()
+     */
+    private $date;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="updateAt", type="datetime", nullable=true)
+     */
+    private $updateAt;
+
+    /**
      * Get id
      *
      * @return integer 
@@ -63,29 +85,6 @@ class RangePrice
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Set price
-     *
-     * @param integer $price
-     * @return RangePrice
-     */
-    public function setPrice($price)
-    {
-        $this->price = $price;
-
-        return $this;
-    }
-
-    /**
-     * Get price
-     *
-     * @return integer 
-     */
-    public function getPrice()
-    {
-        return $this->price;
     }
 
     /**
@@ -162,6 +161,7 @@ class RangePrice
      */
     public function __construct()
     {
+        $this->date = new \DateTime();
         $this->productOptions = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -196,5 +196,114 @@ class RangePrice
     public function getProductOptions()
     {
         return $this->productOptions;
+    }
+
+    /**
+     * Set price
+     *
+     * @param string $price
+     * @return RangePrice
+     */
+    public function setPrice($price)
+    {
+        $this->price = $price;
+
+        return $this;
+    }
+
+    /**
+     * Get price
+     *
+     * @return string 
+     */
+    public function getPrice()
+    {
+        return $this->price;
+    }
+
+    /**
+     * Set date
+     *
+     * @param \DateTime $date
+     * @return RangePrice
+     */
+    public function setDate($date)
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get date
+     *
+     * @return \DateTime 
+     */
+    public function getDate()
+    {
+        return $this->date;
+    }
+
+    /**
+     * Set updateAt
+     *
+     * @param \DateTime $updateAt
+     * @return RangePrice
+     */
+    public function setUpdateAt($updateAt)
+    {
+        $this->updateAt = $updateAt;
+
+        return $this;
+    }
+
+    /**
+     * Get updateAt
+     *
+     * @return \DateTime 
+     */
+    public function getUpdateAt()
+    {
+        return $this->updateAt;
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function updateDate() {
+        $this->setUpdateAt(new \DateTime());
+    }
+
+    /**
+     * Add tags
+     *
+     * @param \Ecortex\ProductManagerBundle\Entity\Tag $tags
+     * @return RangePrice
+     */
+    public function addTag(\Ecortex\ProductManagerBundle\Entity\Tag $tags)
+    {
+        $this->tags[] = $tags;
+
+        return $this;
+    }
+
+    /**
+     * Remove tags
+     *
+     * @param \Ecortex\ProductManagerBundle\Entity\Tag $tags
+     */
+    public function removeTag(\Ecortex\ProductManagerBundle\Entity\Tag $tags)
+    {
+        $this->tags->removeElement($tags);
+    }
+
+    /**
+     * Get tags
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getTags()
+    {
+        return $this->tags;
     }
 }

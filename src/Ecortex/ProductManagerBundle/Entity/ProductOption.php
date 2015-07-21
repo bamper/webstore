@@ -3,12 +3,14 @@
 namespace Ecortex\ProductManagerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * ProductOption
  *
- * @ORM\Table()
+ * @ORM\Table(uniqueConstraints={@ORM\UniqueConstraint(name="uniProduct1",columns={"name", "value", "range_price_id"})})
  * @ORM\Entity(repositoryClass="Ecortex\ProductManagerBundle\Entity\ProductOptionRepository")
+ * @UniqueEntity(fields={"name", "value", "rangePrice"}, message="L'option de cette tranche de prix de ce produit existe déjà")
  */
 class ProductOption
 {
@@ -36,9 +38,9 @@ class ProductOption
     private $value;
 
     /**
-     * @var integer
+     * @var string
      *
-     * @ORM\Column(name="price", type="integer")
+     * @ORM\Column(name="price", type="decimal", scale=2, nullable=true)
      */
     private $price;
 

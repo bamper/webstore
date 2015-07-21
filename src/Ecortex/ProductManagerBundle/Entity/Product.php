@@ -12,6 +12,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ORM\Table(uniqueConstraints={@ORM\UniqueConstraint(name="uniProduct1",columns={"ref", "provider_id"})})
  * @ORM\Entity(repositoryClass="Ecortex\ProductManagerBundle\Entity\ProductRepository")
  * @UniqueEntity(fields={"ref", "provider"}, message="Le produit de ce fournisseur est déjà listé")
+ * @ORM\HasLifecycleCallBacks()
  */
 class Product
 {
@@ -46,6 +47,21 @@ class Product
     private $description;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="date", type="datetime")
+     * @Assert\DateTime()
+     */
+    private $date;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="updateAt", type="datetime", nullable=true)
+     */
+    private $updateAt;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Ecortex\ProductManagerBundle\Entity\Provider")
      * @ORM\JoinColumn(nullable=false)
      */
@@ -55,11 +71,6 @@ class Product
      * @ORM\OneToMany(targetEntity="Ecortex\ProductManagerBundle\Entity\RangePrice", mappedBy="product", cascade={"persist"})
      */
     private $rangePrices;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="Ecortex\ProductManagerBundle\Entity\Tag", cascade={"persist"})
-     */
-    private $tags;
 
     /**
      * @ORM\OneToOne(targetEntity="Ecortex\ProductManagerBundle\Entity\Image")
@@ -150,6 +161,7 @@ class Product
      */
     public function __construct()
     {
+        $this->date = new \DateTime();
         $this->rangePrices = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -210,39 +222,6 @@ class Product
     }
 
     /**
-     * Add tags
-     *
-     * @param \Ecortex\ProductManagerBundle\Entity\Tag $tags
-     * @return Product
-     */
-    public function addTag(\Ecortex\ProductManagerBundle\Entity\Tag $tags)
-    {
-        $this->tags[] = $tags;
-
-        return $this;
-    }
-
-    /**
-     * Remove tags
-     *
-     * @param \Ecortex\ProductManagerBundle\Entity\Tag $tags
-     */
-    public function removeTag(\Ecortex\ProductManagerBundle\Entity\Tag $tags)
-    {
-        $this->tags->removeElement($tags);
-    }
-
-    /**
-     * Get tags
-     *
-     * @return \Doctrine\Common\Collections\Collection 
-     */
-    public function getTags()
-    {
-        return $this->tags;
-    }
-
-    /**
      * Set image
      *
      * @param \Ecortex\ProductManagerBundle\Entity\Image $image
@@ -263,5 +242,58 @@ class Product
     public function getImage()
     {
         return $this->image;
+    }
+
+    /**
+     * Set date
+     *
+     * @param \DateTime $date
+     * @return Product
+     */
+    public function setDate($date)
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get date
+     *
+     * @return \DateTime 
+     */
+    public function getDate()
+    {
+        return $this->date;
+    }
+
+    /**
+     * Set updateAt
+     *
+     * @param \DateTime $updateAt
+     * @return Product
+     */
+    public function setUpdateAt($updateAt)
+    {
+        $this->updateAt = $updateAt;
+
+        return $this;
+    }
+
+    /**
+     * Get updateAt
+     *
+     * @return \DateTime 
+     */
+    public function getUpdateAt()
+    {
+        return $this->updateAt;
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function updateDate() {
+        $this->setUpdateAt(new \DateTime());
     }
 }
