@@ -1,3 +1,13 @@
 ecortex_pm_homepage:
     path:     /
     defaults: { _controller: EcortexProductManagerBundle:Default:index }
+
+ecortex_pm_importFile:
+    path:     /import
+    defaults: { _controller: EcortexProductManagerBundle:Default:import }
+    requirements:
+
+ecortex_pm_importProgess:
+    path:     /progress
+    defaults: { _controller: EcortexProductManagerBundle:Default:progress }
+    requirements:

@@ -35,4 +35,18 @@ class RangePriceRepository extends EntityRepository
 
         return $result;
     }
+
+    public function getByIdWithTags($id)
+    {
+        $q = $this->createQueryBuilder('r')
+            ->where('r.id = :id')
+            ->setParameter('id', $id)
+            ->leftJoin('r.tags', 't')
+            ->addSelect('t')
+            ->getQuery();
+
+        $result = $q->getSingleResult();
+
+        return $result;
+    }
 }

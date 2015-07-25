@@ -1,4 +1,8 @@
 services:
-#    ecortex_pm.example:
+#    ecortex_product_manager.example:
 #        class: Ecortex\ProductManagerBundle\Example
 #        arguments: [@service_id, "plain_value", %parameter%]
+parameters:
+    ecortex_product_manager.beginLineTest:  0
+    ecortex_product_manager.nbLinesTest:    120
+

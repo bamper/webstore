@@ -62,7 +62,7 @@ class Product
     private $updateAt;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Ecortex\ProductManagerBundle\Entity\Provider")
+     * @ORM\ManyToOne(targetEntity="Ecortex\ProductManagerBundle\Entity\Provider", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $provider;

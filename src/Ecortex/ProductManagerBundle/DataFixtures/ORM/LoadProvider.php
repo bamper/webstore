@@ -8,13 +8,13 @@ use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Ecortex\ProductManagerBundle\Entity\Provider;
 
-class LoadFeature extends AbstractFixture implements OrderedFixtureInterface, FixtureInterface
+class LoadProvider extends AbstractFixture implements OrderedFixtureInterface, FixtureInterface
 {
     public function load(ObjectManager $manager)
     {
         // List of Features
         $providers = array(
-            'Fournisseur1',
+            'Goldstar',
             'Fournisseur2',
             'Fournisseur3',
             'Fournisseur4',
