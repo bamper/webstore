@@ -1,11 +1,15 @@
+#TODO homepage en GET et importFile en Post
 ecortex_pm_homepage:
     path:     /
     defaults: { _controller: EcortexProductManagerBundle:Default:index }
+    requirements:
+        _method: GET
 
 ecortex_pm_importFile:
     path:     /import
     defaults: { _controller: EcortexProductManagerBundle:Default:import }
     requirements:
+        _method: POST
 
 ecortex_pm_importProgess:
     path:     /progress

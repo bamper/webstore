@@ -1,8 +1,8 @@
 <?php
 
-namespace Ecortex\ProductManagerBundle\Entity\ImportFile;
+namespace Ecortex\ProductManagerBundle\Entity;
 
-use Ecortex\ProductManagerBundle\Entity\ImportFile\StructureItem;
+use Ecortex\ProductManagerBundle\Entity\StructureItem;
 
 /**
  * FileMasterStructure

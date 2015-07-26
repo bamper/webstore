@@ -1,0 +1,4 @@
+services:
+#    ecortex_web_store.example:
+#        class: Ecortex\WebStoreBundle\Example
+#        arguments: [@service_id, "plain_value", %parameter%]

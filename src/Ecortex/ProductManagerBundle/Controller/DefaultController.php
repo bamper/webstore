@@ -2,28 +2,39 @@
 
 namespace Ecortex\ProductManagerBundle\Controller;
 
-use Doctrine\ORM\EntityManager;
+//Doctrine
 use Doctrine\ORM\NoResultException;
 
-
-use Ecortex\ProductManagerBundle\Entity\ImportFile\FindItem;
+//Symfony
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+
+//Entities Ecortex
 use Ecortex\ProductManagerBundle\Entity\ProductOption;
 use Ecortex\ProductManagerBundle\Entity\RangePrice;
 use Ecortex\ProductManagerBundle\Entity\Tag;
 use Ecortex\ProductManagerBundle\Entity\Product;
-use Ecortex\ProductManagerBundle\Entity\ImportFile\FileMasterStructure;
-use Ecortex\ProductManagerBundle\Entity\ImportFile\ImportFile;
-use Ecortex\ProductManagerBundle\Entity\ImportFile\StructureItem;
+use Ecortex\ProductManagerBundle\Entity\FileMasterStructure;
+use Ecortex\ProductManagerBundle\Entity\ImportFile;
+use Ecortex\ProductManagerBundle\Entity\StructureItem;
 use Ecortex\ProductManagerBundle\Entity\VarGate;
+use Ecortex\ProductManagerBundle\Entity\FindItem;
+use Ecortex\ProductManagerBundle\Entity\UploadFile;
+
+//Type Ecortex
+use Ecortex\ProductManagerBundle\Form\UploadFileType;
 
 class DefaultController extends Controller
 {
 
     public function indexAction() {
-        return $this->render('EcortexProductManagerBundle:Default:index.html.twig');
+        $file = new UploadFile();
+        $form = $this->get('form.factory')->create(new UploadFileType(), $file);
+
+        return $this->render('EcortexProductManagerBundle:Default:index.html.twig', array(
+            'form' => $form->createView()
+        ));
     }
 
     public function progressAction() {
@@ -37,37 +48,65 @@ class DefaultController extends Controller
         return $response;
     }
 
-    public function importAction() {
-        session_write_close();
-        set_time_limit(600) ;
+    public function importAction(Request $request) {
+
+        /*
+         * Variable de session globale
+         */
+        session_write_close(); //pour asynchronous AJAX
+        set_time_limit(600) ; //pour traitement gros fichiers
+
+        /*
+         * Post Form
+         */
+        $file = new UploadFile();
+        $form = $this->get('form.factory')->create(new UploadFileType(), $file);
+        $submit=$form->handleRequest($request);
+
+        /*
+         * MimeTypes Check
+         */
+        $mimeTypes = $this->getParameter('ecortex_product_manager.mimesTypes');
+        $mimeType = $file->getMimeType();
+        if (!in_array($mimeType,$mimeTypes)){
+            $response = new Response();
+            $response->setStatusCode(400);
+            $response->setContent("Fichier CSV attendu");
+            return $response;
+        }
+
+        /*
+         * Form Check
+         */
+        if ($submit->isValid()) {
+            $file->upload();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($file);
+            $em->flush();
+        } else {
+            $response = new Response();
+            $response->setStatusCode(400);
+            $response->setContent((string) $form->getErrors(true));
+            return $response;
+        }
+
+
+        /*
+         * Init Manager ORM
+         */
+        $em = $this->getDoctrine()->getManager();
 
 
         /*
          * init VarGate for Ajax MultiAsynchronous Reading State
          */
-
-        $em = $this->getDoctrine()->getManager();
         if(!$varGate=$em->getRepository('EcortexProductManagerBundle:VarGate')->findOneBySessid($this->varGateSessid)){
             $varGate = new VarGate();
             $varGate->setSessid($this->varGateSessid);
             $em->persist($varGate);
         }
-        $varGate->setValue(json_encode(array(
-            'percent' => 0,
-            'currentRow' => 0,
-            'totalRow' => '?',
-            'elapseTime' => 0,
-            'averageTime' => 0,
-            'remaining' => '?',
-            'elementTime'
-            )));
+        $varGate->setValue(json_encode($this->getParameter('ecortex_product_manager.varGate')));
         $em->flush();
-
-
-        /*
-         * Test file
-         */
-        $fileName = "goldstar.csv";
 
 
         /*
@@ -81,6 +120,9 @@ class DefaultController extends Controller
          * getting & init Product Provider
          */
         try {
+            //$fileName = substr($file->getUrl(),strlen($file->getUploadDir()));
+            $fileName = substr($file->getUrl(), 0, strlen($file->getUrl())-4);
+            $fileCompletName = $file->getUploadDir() . "/" . $file->getUrl();
             $this->getProvider($fileName);
         } catch(\Exception $e) {
             return $response = $this->makeResponse($e->getMessage(), $response);
@@ -91,10 +133,11 @@ class DefaultController extends Controller
         /*
          * Open File and process
          */
-        if(($handle = fopen($fileName,'r')) !== false){
+
+        if(($handle = fopen($fileCompletName,'r')) !== false){
             try {
                 /*Passage des arguments ressources aux privates du controller*/
-                $this->initFile($fileName, $handle);
+                $this->initFile($fileCompletName, $handle);
 
                 /*recup et verif des entetes*/
                 $this->getOptionsAndTags();
@@ -159,37 +202,15 @@ class DefaultController extends Controller
 
         $struc1 = new FileMasterStructure();
 
-        $item1 = new StructureItem("master" ,array(
-            'produit',
-            'ref',
-            'description',
-            'min',
-            'max',
-            'ht'
-        ));
-
-
-        $item2 = new StructureItem("option", array(
-            'option_nom',
-            'option_valeur',
-            'option_prix',
-        ));
-        $findItem2 = new FindItem($item2->getName());
-
-
-        $item3 = new StructureItem("tag", array(
-            'tag',
-        ));
-        $findItem3 = new FindItem($item3->getName());
-
-        $struc1->addItem($item1);
-        $struc1->addItem($item2);
-        $struc1->addItem($item3);
-
+        foreach($this->getParameter('ecortex_product_manager.structures') as $keyItem => $valuesItem) {
+            $structure = new StructureItem($keyItem, $valuesItem);
+            if ($keyItem != 'master') {
+                $findItem = new FindItem($structure->getName());
+                $this->importFile->addFindItem($findItem);
+            }
+            $struc1->addItem($structure);
+        }
         $this->importFile->setStructure($struc1);
-        $this->importFile->addFindItem($findItem2);
-        $this->importFile->addFindItem($findItem3);
-
 
     }
 
@@ -212,8 +233,6 @@ class DefaultController extends Controller
     //Retourne le fournisseur
     private function getProvider($filename) {
         try {
-            //@TODO extraire le nom de fichier
-            $filename = "goldstar";
             $em = $this->getDoctrine()->getManager();
             if (!$provider = $em->getRepository('EcortexProductManagerBundle:Provider')->findOneByName($filename)) {
                 throw new \Exception("Le fournisseur \"".$filename."\" n'existe pas. Déclarez le SVP.");

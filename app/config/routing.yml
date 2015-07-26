@@ -1,4 +1,8 @@
+ecortex_web_store:
+    resource: "@EcortexWebStoreBundle/Resources/config/routing.yml"
+    prefix:   /
+
 ecortex_pm:
     resource: "@EcortexProductManagerBundle/Resources/config/routing.yml"
-    prefix:   /
+    prefix:   /admin/products/
 

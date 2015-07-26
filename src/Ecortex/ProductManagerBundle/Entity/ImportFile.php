@@ -1,8 +1,8 @@
 <?php
 
-namespace Ecortex\ProductManagerBundle\Entity\ImportFile;
+namespace Ecortex\ProductManagerBundle\Entity;
 
-use Ecortex\ProductManagerBundle\Entity\ImportFile\FileMasterStructure;
+use Ecortex\ProductManagerBundle\Entity\FileMasterStructure;
 
 /**
  * ImportFile
@@ -15,11 +15,6 @@ class ImportFile
     private $findItem = [];
     private $lineCount;
 
-    public function __construct($name = null) {
-        if ($name != null) {
-            $this->setName($name);
-        }
-    }
 
     public function getName() {
         return $this->name;

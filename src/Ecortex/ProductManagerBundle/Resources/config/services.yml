@@ -4,5 +4,25 @@ services:
 #        arguments: [@service_id, "plain_value", %parameter%]
 parameters:
     ecortex_product_manager.beginLineTest:  0
-    ecortex_product_manager.nbLinesTest:    120
+    ecortex_product_manager.nbLinesTest:    0
+    ecortex_product_manager.mimesTypes:
+        - "text/comma-separated-values"
+        - "text/csv"
+        - "application/csv"
+        - "application/excel"
+        - "application/vnd.ms-excel"
+        - "application/vnd.msexcel"
+        - "text/anytext"
+    ecortex_product_manager.structures:
+        master: ['produit','ref','description','min','max','ht']
+        option: ['option_nom','option_valeur','option_prix']
+        tag:    [tag]
+    ecortex_product_manager.varGate:
+        percent: 0
+        currentRow: 0
+        totalRow: '?'
+        elapseTime: 0
+        averageTime: 0
+        remaining: '?'
+        elementTime: 0
 

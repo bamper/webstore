@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecortex\ProductManagerBundle\Entity\ImportFile;
+namespace Ecortex\ProductManagerBundle\Entity;
 
 
 

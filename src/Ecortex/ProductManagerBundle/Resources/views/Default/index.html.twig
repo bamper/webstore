@@ -1,79 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-    .progress { position:relative; width:400px; border: 1px solid #ddd; padding: 1px; border-radius: 3px; }
-    .bar { background-color: #B4F5B4; width:0%; height:20px; border-radius: 3px; }
-    .percent { position:absolute; display:inline-block; top:3px; left:48%; }
-</style>
-</head>
-<body>
-<p>Page d'import du fichier CSV</p>
-<button id="import">Importer</button>
-<div id="importOk"></div>
-<div class="progress">
-    <div class="bar" id="bar"></div >
-    <div class="percent" id="percent">0%</div >
+{% block entity_widget %}
+<div id="providerImport">
+    <p>Import fichier fournisseur</p>
+    <div id="fileChoice">
+        <label id="inputFileLabel" for="inputFile" class="btn btn-success">
+            <i class="glyphicon glyphicon-picture"></i>
+            Fichier (.csv):
+        </label>
+        <input id="inputFile" class="ajax_file hidden" type="file" data-target="{{ path('ecortex_pm_importFile') }}" >
+        <input id="importProgressPath" type="hidden" value="{{ path('ecortex_pm_importProgess') }}">
+        <button id="buttonImport">Importer</button>
+    </div>
+    <div id="globalStatus">
+        <p>Téléchargement:</p>
+        <div class="progress">
+                <div id="loadingBar" class="bar"></div >
+                <div class="percent" id="percentUpload">0%</div >
+        </div>
+
+        <p>Traitement:</p>
+        <div class="progress">
+            <div class="bar" id="traitementBar"></div >
+            <div class="percent" id="percentTraitement">0%</div >
+        </div>
+
+        <div id="status"></div>
+        <div id="importOk"></div>
+    </div>
 </div>
-
-
-<div id="status"></div>
-
-
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script type="text/javascript">
-
-    $(function(){
-        $('#import').click(function(){
-            $('#importOk').html('');
-            $('#status').html('');
-            $.ajax({
-                type: 'GET',
-                async: true,
-                cache: false,
-                url: '{{ path('ecortex_pm_importFile') }}',
-                timeout: 600000,
-                success: function(data) {
-                    $('#importOk').html(data);
-                    //$('#importOk').html('');
-                },
-                error: function(jqXHR, textStatus, ErrorThrown ) {
-                    $('#importOk').html(jqXHR.responseText);
-                    clearInterval(interval);
-                }
-            });
-            percent = 0;
-            interval = setInterval(function() {
-                $.ajax({
-                    type: 'GET',
-                    async: true,
-                    dataType: "json",
-                    url: '{{ path('ecortex_pm_importProgess') }}',
-                    timeout: 3000,
-                    cache:false,
-                    success: function (data) {
-                        percent = data.percent;
-                        $('#percent').html(data.percent+"%");
-                        $('#bar').css('width', data.percent+'%');
-                        $('#status').html(
-                                '<p>'+data.currentRow+' lignes traitées sur un total de '+ data.totalRow +'</p>'+
-                                '<p>Temps passé: ' + Math.trunc(data.elapseTime) + ' secondes | Estimation du temps restant: '+ Math.trunc(data.remaining) + ' secondes</p>'+
-                                '<p>Vitesse instantanée: ' + Math.trunc((1/data.elementTime)*10)/10 + ' ligne(s)/seconde | Vitesse moyenne: ' + Math.trunc((1/data.averageTime)*10)/10 + ' lignes(s)/seconde</p>')
-                    },
-                    error: function () {
-                        $('#importOk').html('<p>La requête n\'a pas abouti</p>');
-                    }
-
-                });
-                if (percent == 100) {
-                    clearInterval(this);
-                }
-            },1000);
-        });
-
-    });
-
-</script>
-</body>
-</html>
-
+{% endblock entity_widget %}
